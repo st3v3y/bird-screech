@@ -45,12 +45,17 @@ export const useMessagesStore = defineStore('messages', {
       }
     },
     setupStorageListener() {
-      chrome.storage.onChanged.addListener((changes:any, area:string) => {
-        console.log("Chrome storage changed:", changes, area);
-        
+      chrome.storage.onChanged.addListener((changes:any, area:string) => {        
         if (area === 'local' && changes.messages && !this.isInternalUpdate) { 
-          this.messages = changes.messages.newValue;
+          const newMessages = changes.messages.newValue;
+          const changedMessages = newMessages.filter((message:Message) => !changes.messages.oldValue.some((oldMessage:Message) => oldMessage.id === message.id));
+          this.messages = newMessages;
           this.updateBadge();
+
+          const hasPriority = changedMessages && changedMessages.some((msg: Message) => msg.priority == "high");
+          const audio = hasPriority ? "screech.m4a" : "calling.m4a";
+          const notificationAudio = new Audio(chrome.runtime.getURL("audio/" + audio));
+          notificationAudio.play();
         }
       });
     },
@@ -71,15 +76,14 @@ export const useMessagesStore = defineStore('messages', {
     },
     updateBadge() {
       const unreadCount = this.unreadMessages.length;
-      chrome.action.setBadgeText({ 
-        text: unreadCount > 0 ? unreadCount.toString() : '' 
-      });
+      chrome.action.setBadgeText({ text: unreadCount > 0 ? unreadCount.toString() : '' });
+      chrome.action.setBadgeTextColor({ color: 'white' });
       chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
     }
   },
   getters: {
-    unreadMessages: (state) => Array.from(state.messages).filter(msg => !msg.read),
+    unreadMessages: (state) => Array.from(state.messages).filter(msg => !msg.read).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
     unreadMessageCount: (state) => Array.from(state.messages).filter(msg => !msg.read).length,
-    readMessages: (state) => Array.from(state.messages).filter(msg => msg.read),
-  },
+    readMessages: (state) => Array.from(state.messages).filter(msg => msg.read).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+  }
 });

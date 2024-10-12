@@ -1,4 +1,4 @@
-chrome.alarms.create("checkMessages", { periodInMinutes: 1 });
+chrome.alarms.create("checkMessages", { periodInMinutes: 0.2 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "checkMessages") {
@@ -16,7 +16,8 @@ function checkForNewMessages() {
   })
   .then(response => {
     if (!response.ok) {
-      throw new Error('Network response was not ok');
+      updateBadgeError();
+      throw new Error("Network response was not ok");
     }
     return response.json();
   })
@@ -25,11 +26,8 @@ function checkForNewMessages() {
       chrome.storage.local.get({messages: []}, (result) => {
         const storedMessages = result.messages ? Object.values(result.messages) : [];
 
-        console.log("storedMessages:", storedMessages);
-        
         const newMessages = data.messages.filter(msg => !storedMessages.some(storedMsg => storedMsg.id === msg.id)) || [];
 
-        console.log("newMessages:", newMessages);
 
         if (newMessages.length > 0) {
           const updatedMessages = [...storedMessages, ...newMessages];
@@ -39,18 +37,26 @@ function checkForNewMessages() {
       });
     } else {
       console.error('Unexpected data format from API');
+      updateBadgeError();
     }
   })
   .catch(error => {
     console.error('Error fetching messages:', error);
+    updateBadgeError();
   });
 }
 
-function updateBadge(messages) {
-  console.log("messages", messages);
-  
+function updateBadge(messages) {  
   const unreadCount = messages.filter(msg => !msg.read).length;
   chrome.action.setBadgeText({ text: unreadCount > 0 ? unreadCount.toString() : '' });
+  chrome.action.setBadgeTextColor({ color: 'white' });
+  chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
+}
+
+
+function updateBadgeError() {  
+  chrome.action.setBadgeText({ text: "!" });
+  chrome.action.setBadgeTextColor({ color: 'white' });
   chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
 }
 
