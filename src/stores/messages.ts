@@ -4,6 +4,7 @@ interface MessageOutbound {
   id: string;
   content: string;
   priority: string;
+  category: string;
   timestamp: Date;
   read: boolean;
 }
@@ -48,7 +49,7 @@ export const useMessagesStore = defineStore('messages', {
       chrome.storage.onChanged.addListener((changes:any, area:string) => {        
         if (area === 'local' && changes.messages && !this.isInternalUpdate) { 
           const newMessages = changes.messages.newValue;
-          const changedMessages = newMessages.filter((message:Message) => !changes.messages.oldValue.some((oldMessage:Message) => oldMessage.id === message.id));
+          const changedMessages = newMessages.filter((message:Message) => !changes.messages.oldValue || !changes.messages.oldValue.some((oldMessage:Message) => oldMessage.id === message.id));
           this.messages = newMessages;
           this.updateBadge();
 

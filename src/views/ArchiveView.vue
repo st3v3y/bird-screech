@@ -10,5 +10,5 @@
 </script>
 
 <template>
-  <MessageList :messages="readMessages" :loading="loading" @messageClick="toggleRead" />
+  <MessageList :messages="readMessages" :loading="loading" @messageClick="toggleRead" :showCategory="true" />
 </template>

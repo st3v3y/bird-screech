@@ -6,6 +6,8 @@
     priority: string;
     timestamp: Date;
     read: boolean;
+    category: string;
+    showCategory: boolean;
     onReadMessage: () => void
   }>()
 
@@ -32,6 +34,9 @@
       <div class="text-xs text-gray-500">{{ readableDate }}</div>
       <div>
         {{ content }}
+      </div>
+      <div v-if="showCategory" class="text-xs text-gray-500" :class="!category ? 'italic' : ''">
+        {{ category ?? "No category" }}
       </div>
     </div>
     <span>{{ priority == "high" ? "🔥" : "&nbsp;" }}</span>

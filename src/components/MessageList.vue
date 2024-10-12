@@ -5,6 +5,7 @@
   defineProps<{
     messages: Message[],
     loading: boolean,
+    showCategory: boolean,
     onMessageClick: (id:string) => void
   }>()
 </script>
@@ -18,8 +19,8 @@
       You have no messages here
     </div>
     <div class="flex flex-col gap-1 max-h-64 overflow-y-scroll">
-      <div v-for="({ id, content, priority, timestamp, read }) in messages" :key="id">
-        <MessageEntry :content="content" :priority="priority" :timestamp="timestamp" :read="read" @readMessage="onMessageClick(id)" />
+      <div v-for="({ id, content, priority, timestamp, category, read }) in messages" :key="id">
+        <MessageEntry :content="content" :priority="priority" :timestamp="timestamp" :read="read" @readMessage="onMessageClick(id)" :category="category" :showCategory />
       </div>
     </div>
   </div>
