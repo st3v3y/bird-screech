@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { useOptionsStore } from './options';
 
 interface MessageOutbound {
   id: string;
@@ -53,10 +54,14 @@ export const useMessagesStore = defineStore('messages', {
           this.messages = newMessages;
           this.updateBadge();
 
-          const hasPriority = changedMessages && changedMessages.some((msg: Message) => msg.priority == "high");
-          const audio = hasPriority ? "screech.m4a" : "calling.m4a";
-          const notificationAudio = new Audio(chrome.runtime.getURL("audio/" + audio));
-          notificationAudio.play();
+          const optionsStore = useOptionsStore();
+
+          if (this.messages.length > 0 && optionsStore.playNotificationAudio) {
+            const hasPriority = changedMessages && changedMessages.some((msg: Message) => msg.priority == "high");
+            const audio = hasPriority ? "screech.m4a" : "calling.m4a";
+            const notificationAudio = new Audio(chrome.runtime.getURL("audio/" + audio));
+            notificationAudio.play();
+          }
         }
       });
     },
@@ -83,6 +88,7 @@ export const useMessagesStore = defineStore('messages', {
     }
   },
   getters: {
+    messageCount: (state) => state.messages.length,
     unreadMessages: (state) => Array.from(state.messages).filter(msg => !msg.read).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
     unreadMessageCount: (state) => Array.from(state.messages).filter(msg => !msg.read).length,
     readMessages: (state) => Array.from(state.messages).filter(msg => msg.read).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())

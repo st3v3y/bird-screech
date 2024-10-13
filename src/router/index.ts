@@ -13,6 +13,11 @@ const router = createRouter({
       path: '/archive',
       name: 'archive',
       component: () => import('../views/ArchiveView.vue')
+    },
+    {
+      path: '/options',
+      name: 'options',
+      component: () => import('../OptionsPage.vue')
     }
   ]
 })

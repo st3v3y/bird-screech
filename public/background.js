@@ -7,42 +7,43 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 function checkForNewMessages() {
-  fetch('http://localhost:3000/api/messages', {
-    method: 'GET',
-    mode: 'cors',
-    headers: {
-      'Accept': 'application/json',
-    },
-  })
-  .then(response => {
-    if (!response.ok) {
+  chrome.storage.sync.get(['serverUrl'], (result) => {
+    const serverUrl = result.serverUrl || 'http://localhost:3000/api/messages';
+    fetch(serverUrl, {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        'Accept': 'application/json',
+      },
+    })
+    .then(response => {
+      if (!response.ok) {
+        updateBadgeError();
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data && data.messages && Array.isArray(data.messages)) {
+        chrome.storage.local.get({messages: []}, (result) => {
+          const storedMessages = result.messages ? Object.values(result.messages) : [];
+          const newMessages = data.messages.filter(msg => !storedMessages.some(storedMsg => storedMsg.id === msg.id)) || [];
+  
+          if (newMessages.length > 0) {
+            const updatedMessages = [...storedMessages, ...newMessages];
+            chrome.storage.local.set({ messages: updatedMessages });
+            updateBadge(updatedMessages);
+          }
+        });
+      } else {
+        console.error('Unexpected data format from API');
+        updateBadgeError();
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching messages:', error);
       updateBadgeError();
-      throw new Error("Network response was not ok");
-    }
-    return response.json();
-  })
-  .then(data => {
-    if (data && data.messages && Array.isArray(data.messages)) {
-      chrome.storage.local.get({messages: []}, (result) => {
-        const storedMessages = result.messages ? Object.values(result.messages) : [];
-
-        const newMessages = data.messages.filter(msg => !storedMessages.some(storedMsg => storedMsg.id === msg.id)) || [];
-
-
-        if (newMessages.length > 0) {
-          const updatedMessages = [...storedMessages, ...newMessages];
-          chrome.storage.local.set({ messages: updatedMessages });
-          updateBadge(updatedMessages);
-        }
-      });
-    } else {
-      console.error('Unexpected data format from API');
-      updateBadgeError();
-    }
-  })
-  .catch(error => {
-    console.error('Error fetching messages:', error);
-    updateBadgeError();
+    });
   });
 }
 
