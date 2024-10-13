@@ -3,7 +3,7 @@
   import { useMessagesStore } from './stores/messages';
   import { storeToRefs } from 'pinia';
   import { useOptionsStore } from './stores/options';
-import ScreechScreen from './components/ScreechScreen.vue';
+  import ScreechScreen from './components/ScreechScreen.vue';
 
   const messageStore = useMessagesStore();
   const optionsStore = useOptionsStore();
