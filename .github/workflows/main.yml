@@ -32,7 +32,51 @@ jobs:
 
   bump-version:
     needs: lint-and-test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.VERSION_TOKEN }}  # Use a Personal Access Token with repo scope
+
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Configure Git
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+
+    - name: Check for changes
+      id: git-check
+      run: |
+        git status --porcelain
+        if [ -z "$(git status --porcelain)" ]; then
+          echo "::set-output name=changes::false"
+        else
+          echo "::set-output name=changes::true"
+        fi
+
+    - name: Commit changes if any
+      if: steps.git-check.outputs.changes == 'true'
+      run: |
+        git add .
+        git commit -m "Automated changes before version bump [skip ci]"
+
+    - name: Bump version
+      run: |
+        npm version patch -m "Bump version to %s [skip ci]"
+        git push --follow-tags
+
+  create-release:
+    needs: bump-version
     runs-on: ubuntu-latest
 
     steps:
@@ -48,42 +92,17 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Configure Git
-      run: |
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-
-    - name: Bump version
-      run: |
-        npm version patch -m "Bump version to %s [skip ci]"
-        git push --follow-tags
-
-  create-release:
-    needs: bump-version
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
-
-    - name: Install dependencies
-      run: npm ci
-
     - name: Build extension
       run: npm run build
 
     - name: Create ZIP file
-      run: zip -r bird-screech-chrome-extension.zip dist
+      run: zip -r chrome-extension.zip dist
 
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.VERSION_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
@@ -93,9 +112,9 @@ jobs:
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.VERSION_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./bird-screech-chrome-extension.zip
-        asset_name: bird-screech-chrome-extension.zip
+        asset_path: ./chrome-extension.zip
+        asset_name: chrome-extension.zip
         asset_content_type: application/zip
