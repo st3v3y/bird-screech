@@ -1,5 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import MessagesView from '../views/MessagesView.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import MessagesView from '../views/MessagesView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,6 +20,6 @@ const router = createRouter({
       component: () => import('../OptionsPage.vue')
     }
   ]
-})
+});
 
-export default router
+export default router;

@@ -7,20 +7,20 @@ const mockChrome = {
   storage: {
     local: {
       get: vi.fn(),
-      set: vi.fn(),
+      set: vi.fn()
     },
     onChanged: {
-      addListener: vi.fn(),
-    },
+      addListener: vi.fn()
+    }
   },
   action: {
     setBadgeText: vi.fn(),
     setBadgeTextColor: vi.fn(),
-    setBadgeBackgroundColor: vi.fn(),
+    setBadgeBackgroundColor: vi.fn()
   },
   runtime: {
-    getURL: vi.fn(),
-  },
+    getURL: vi.fn()
+  }
 };
 
 global.chrome = mockChrome as any;
@@ -44,7 +44,7 @@ describe('Messages Store', () => {
   it('should load messages correctly', async () => {
     const mockMessages = [
       { id: '1', content: 'Test message 1', read: false, timestamp: new Date().toISOString() },
-      { id: '2', content: 'Test message 2', read: true, timestamp: new Date().toISOString() },
+      { id: '2', content: 'Test message 2', read: true, timestamp: new Date().toISOString() }
     ];
 
     mockChrome.storage.local.get.mockImplementation((_, callback) => {
@@ -73,8 +73,22 @@ describe('Messages Store', () => {
 
   it('should update badge correctly', () => {
     store.messages = [
-      { id: '1', content: 'Test message 1', read: false, timestamp: new Date(), category: 'Test category', priority: 'high' },
-      { id: '2', content: 'Test message 2', read: true, timestamp: new Date(), category: 'Test category', priority: 'high' },
+      {
+        id: '1',
+        content: 'Test message 1',
+        read: false,
+        timestamp: new Date(),
+        category: 'Test category',
+        priority: 'high'
+      },
+      {
+        id: '2',
+        content: 'Test message 2',
+        read: true,
+        timestamp: new Date(),
+        category: 'Test category',
+        priority: 'high'
+      }
     ];
 
     store.updateBadge();
@@ -86,9 +100,30 @@ describe('Messages Store', () => {
 
   it('should filter unread messages correctly', () => {
     store.messages = [
-      { id: '1', content: 'Test message 1', read: false, timestamp: new Date(), category: 'Test category', priority: 'high' },
-      { id: '2', content: 'Test message 2', read: true, timestamp: new Date(), category: 'Test category', priority: 'high' },
-      { id: '3', content: 'Test message 3', read: false, timestamp: new Date(), category: 'Test category', priority: 'high' },
+      {
+        id: '1',
+        content: 'Test message 1',
+        read: false,
+        timestamp: new Date(),
+        category: 'Test category',
+        priority: 'high'
+      },
+      {
+        id: '2',
+        content: 'Test message 2',
+        read: true,
+        timestamp: new Date(),
+        category: 'Test category',
+        priority: 'high'
+      },
+      {
+        id: '3',
+        content: 'Test message 3',
+        read: false,
+        timestamp: new Date(),
+        category: 'Test category',
+        priority: 'high'
+      }
     ];
 
     expect(store.unreadMessages).toHaveLength(2);
@@ -98,9 +133,30 @@ describe('Messages Store', () => {
 
   it('should filter read messages correctly', () => {
     store.messages = [
-      { id: '1', content: 'Test message 1', read: false, timestamp: new Date(), category: 'Test category', priority: 'high' },
-      { id: '2', content: 'Test message 2', read: true, timestamp: new Date(), category: 'Test category', priority: 'high' },
-      { id: '3', content: 'Test message 3', read: true, timestamp: new Date(), category: 'Test category', priority: 'high' }
+      {
+        id: '1',
+        content: 'Test message 1',
+        read: false,
+        timestamp: new Date(),
+        category: 'Test category',
+        priority: 'high'
+      },
+      {
+        id: '2',
+        content: 'Test message 2',
+        read: true,
+        timestamp: new Date(),
+        category: 'Test category',
+        priority: 'high'
+      },
+      {
+        id: '3',
+        content: 'Test message 3',
+        read: true,
+        timestamp: new Date(),
+        category: 'Test category',
+        priority: 'high'
+      }
     ];
 
     expect(store.readMessages).toHaveLength(2);
@@ -110,9 +166,30 @@ describe('Messages Store', () => {
 
   it('should count unread messages correctly', () => {
     store.messages = [
-      { id: '1', content: 'Test message 1', read: false, timestamp: new Date(), category: 'Test category', priority: 'high' },
-      { id: '2', content: 'Test message 2', read: true, timestamp: new Date(), category: 'Test category', priority: 'high' },
-      { id: '3', content: 'Test message 3', read: false, timestamp: new Date(), category: 'Test category', priority: 'high' }
+      {
+        id: '1',
+        content: 'Test message 1',
+        read: false,
+        timestamp: new Date(),
+        category: 'Test category',
+        priority: 'high'
+      },
+      {
+        id: '2',
+        content: 'Test message 2',
+        read: true,
+        timestamp: new Date(),
+        category: 'Test category',
+        priority: 'high'
+      },
+      {
+        id: '3',
+        content: 'Test message 3',
+        read: false,
+        timestamp: new Date(),
+        category: 'Test category',
+        priority: 'high'
+      }
     ];
 
     expect(store.unreadMessageCount).toBe(2);

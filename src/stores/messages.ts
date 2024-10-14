@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
 import { useOptionsStore } from './options';
 
 interface MessageOutbound {
@@ -31,13 +31,12 @@ export const useMessagesStore = defineStore('messages', {
       this.loading = true;
       this.error = null;
       try {
-        const result = await new Promise((resolve) => { 
-            console.log("Loading messages");
-            return chrome.storage.local.get(['messages'], resolve) 
-          }
-        );
-        console.log("Loaded messages", result);
-        this.messages = result.messages ? Object.values(result.messages) as Message[] : [];
+        const result = await new Promise((resolve) => {
+          console.log('Loading messages');
+          return chrome.storage.local.get(['messages'], resolve);
+        });
+        console.log('Loaded messages', result);
+        this.messages = result.messages ? (Object.values(result.messages) as Message[]) : [];
 
         this.updateBadge();
       } catch (error) {
@@ -47,26 +46,31 @@ export const useMessagesStore = defineStore('messages', {
       }
     },
     setupStorageListener() {
-      chrome.storage.onChanged.addListener((changes:any, area:string) => {        
-        if (area === 'local' && changes.messages && !this.isInternalUpdate) { 
+      chrome.storage.onChanged.addListener((changes: any, area: string) => {
+        if (area === 'local' && changes.messages && !this.isInternalUpdate) {
           const newMessages = changes.messages.newValue;
-          const changedMessages = newMessages.filter((message:Message) => !changes.messages.oldValue || !changes.messages.oldValue.some((oldMessage:Message) => oldMessage.id === message.id));
+          const changedMessages = newMessages.filter(
+            (message: Message) =>
+              !changes.messages.oldValue ||
+              !changes.messages.oldValue.some((oldMessage: Message) => oldMessage.id === message.id)
+          );
           this.messages = newMessages;
           this.updateBadge();
 
           const optionsStore = useOptionsStore();
 
           if (this.messages.length > 0 && optionsStore.playNotificationAudio) {
-            const hasPriority = changedMessages && changedMessages.some((msg: Message) => msg.priority == "high");
-            const audio = hasPriority ? "screech.m4a" : "calling.m4a";
-            const notificationAudio = new Audio(chrome.runtime.getURL("audio/" + audio));
+            const hasPriority =
+              changedMessages && changedMessages.some((msg: Message) => msg.priority == 'high');
+            const audio = hasPriority ? 'screech.m4a' : 'calling.m4a';
+            const notificationAudio = new Audio(chrome.runtime.getURL('audio/' + audio));
             notificationAudio.play();
           }
         }
       });
     },
     async toggleRead(messageId: string) {
-      const message = this.messages.find(msg => msg.id === messageId);
+      const message = this.messages.find((msg) => msg.id === messageId);
       if (message) {
         message.read = !message.read;
         this.isInternalUpdate = true;
@@ -75,7 +79,7 @@ export const useMessagesStore = defineStore('messages', {
       }
     },
     async syncToStorage() {
-      await new Promise(resolve => 
+      await new Promise((resolve) =>
         chrome.storage.local.set({ messages: this.messages }, resolve)
       );
       this.updateBadge();
@@ -89,8 +93,14 @@ export const useMessagesStore = defineStore('messages', {
   },
   getters: {
     messageCount: (state) => state.messages.length,
-    unreadMessages: (state) => Array.from(state.messages).filter(msg => !msg.read).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
-    unreadMessageCount: (state) => Array.from(state.messages).filter(msg => !msg.read).length,
-    readMessages: (state) => Array.from(state.messages).filter(msg => msg.read).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    unreadMessages: (state) =>
+      Array.from(state.messages)
+        .filter((msg) => !msg.read)
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
+    unreadMessageCount: (state) => Array.from(state.messages).filter((msg) => !msg.read).length,
+    readMessages: (state) =>
+      Array.from(state.messages)
+        .filter((msg) => msg.read)
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
   }
 });
