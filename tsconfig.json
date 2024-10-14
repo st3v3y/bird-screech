@@ -9,6 +9,6 @@
     }
   ],
   "compilerOptions": {
-    "types": ["vitest/globals"]
+    "types": ["chrome", "vitest/globals"]
   }
 }
