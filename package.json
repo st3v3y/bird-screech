@@ -16,13 +16,13 @@
     "format:check": "prettier --check src/"
   },
   "dependencies": {
-    "@pinia/testing": "^0.1.6",
-    "@types/chrome": "^0.0.277",
     "pinia": "^2.1.7",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3"
   },
   "devDependencies": {
+    "@pinia/testing": "^0.1.6",
+    "@types/chrome": "^0.0.277",
     "@rushstack/eslint-patch": "^1.8.0",
     "@testing-library/vue": "^8.1.0",
     "@tsconfig/node20": "^20.1.4",

@@ -31,15 +31,13 @@ export const useMessagesStore = defineStore('messages', {
       this.loading = true;
       this.error = null;
       try {
-        const result = await new Promise((resolve) => {
-          console.log('Loading messages');
-          return chrome.storage.local.get(['messages'], resolve);
+        const result: { messages: { [key: string]: Message } }  = await new Promise((resolve) => {
+          return chrome.storage.local.get({ messages: {} }, resolve);
         });
-        console.log('Loaded messages', result);
         this.messages = result.messages ? (Object.values(result.messages) as Message[]) : [];
 
         this.updateBadge();
-      } catch (error) {
+      } catch (error: any) {
         this.error = error.message;
       } finally {
         this.loading = false;
@@ -80,7 +78,7 @@ export const useMessagesStore = defineStore('messages', {
     },
     async syncToStorage() {
       await new Promise((resolve) =>
-        chrome.storage.local.set({ messages: this.messages }, resolve)
+        chrome.storage.local.set({ messages: this.messages }, () => resolve)
       );
       this.updateBadge();
     },
