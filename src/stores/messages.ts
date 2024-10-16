@@ -31,7 +31,7 @@ export const useMessagesStore = defineStore('messages', {
       this.loading = true;
       this.error = null;
       try {
-        const result: { messages: { [key: string]: Message } }  = await new Promise((resolve) => {
+        const result: { messages: { [key: string]: Message } } = await new Promise((resolve) => {
           return chrome.storage.local.get({ messages: {} }, resolve);
         });
         this.messages = result.messages ? (Object.values(result.messages) as Message[]) : [];
